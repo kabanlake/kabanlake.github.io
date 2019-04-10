@@ -1,0 +1,201 @@
+<style>
+*{
+	padding:0; margin:0;
+}
+.node{
+	position:absolute; width:40; height:40; border-radius:20px; font-size:28px;
+	background-color:green; color:white; text-align:center;
+	z-index:10
+}
+.arrow{
+	font-size:0;
+	transform-origin:0 50%;
+	position:absolute;
+	z-index:8;
+}
+.rect{
+	background-color:red;
+	height:8; width:2;
+}
+.tri{
+	background-color:white;
+	height:0; width:0;
+	border-left:16px solid red;
+	border-top:8px solid white;
+	border-bottom:8px solid white;
+	display:inline-block;
+	position:absolute; right:-16; top:-4;
+}
+#run{
+	position:absolute; top:0; left:0;
+	height:30; width:200;
+	text-align:center;
+	font:24px bold;
+	color:white; background-color:green;
+	border-radius:4px;
+}
+#add:hover,#run:hover{
+	color:yellow; background-color:#6495ed;
+}
+</style>
+
+<label id="run">Start Game</label>
+
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+	speed = 400,delColor = '#1E90FF',radius = 20, aSize = 16
+	function frameUpper(){
+		if(now < uLen - 1){
+			p1 = upperPoints[now], p2 = upperPoints[now + 1]
+			$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
+			dist = Math.sqrt((p2[0] - p1[0]) * (p2[0] - p1[0]) + (p2[1] - p1[1]) * (p2[1] - p1[1]))
+			angle = 180 * Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])) / Math.PI
+			to = dist - radius - aSize
+			$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(" + angle + "deg)")
+			$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed, function(){
+				upperInfo.push([p1,p2,angle])
+				processUpper()
+			})
+		}else{
+			if(upperPoints[uLen - 1][2] != lowerPoints[0][2]){
+				p1 = upperPoints[uLen - 1], p2 = lowerPoints[0]
+				$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
+				dist = p1[1] - p2[1], to = dist - radius - aSize
+				$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(-" + 90 + "deg)")
+				$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed, function(){
+					now = 0
+					frameLower()
+				})
+			}else{
+				now = 0
+				frameLower();
+			}
+		}
+	}
+	
+	function processUpper(){
+		if(upperInfo.length <= 1) {now += 1; frameUpper()}
+		else{
+			len = upperInfo.length;
+			if(upperInfo[len - 1][2] <= upperInfo[len - 2][2]) {now += 1; frameUpper()}
+			else{
+				a2 = upperInfo[len - 1],a1 = upperInfo[len - 2]
+				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .rect').css("background-color",delColor)
+				$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .rect').css("background-color",delColor)
+				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .tri').css("border-left-color",delColor)
+				$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .tri').css("border-left-color",delColor)
+				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .rect').animate({width:2}, speed, function(){
+					$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .rect').animate({width:2}, speed, function(){
+						p1 = a1[0],p2 = a2[1]
+						upperInfo.pop();upperInfo.pop();
+						$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
+						dist = Math.sqrt((p2[0] - p1[0]) * (p2[0] - p1[0]) + (p2[1] - p1[1]) * (p2[1] - p1[1]))
+						angle = 180 * Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])) / Math.PI
+						to = dist - radius - aSize
+						$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(" + angle + "deg)")
+						$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed, function(){
+							upperInfo.push([p1,p2,angle])
+							processUpper()
+						})
+					})
+				})
+			}
+		}
+	}
+	
+	function frameLower(){
+		if(now < lLen - 1){
+			p1 = lowerPoints[now], p2 = lowerPoints[now + 1]
+			$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
+			dist = Math.sqrt((p2[0] - p1[0]) * (p2[0] - p1[0]) + (p2[1] - p1[1]) * (p2[1] - p1[1]))
+			angle = 180 * Math.atan((p1[1] - p2[1]) / (p1[0] - p2[0])) / Math.PI
+			r = angle + 180
+			to = dist - radius - aSize
+			$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(" + r + "deg)")
+			$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed, function(){
+				lowerInfo.push([p1,p2,angle])
+				processLower()
+			})
+		}else{
+			if(upperPoints[0][2] != lowerPoints[lLen - 1][2]){
+				p1 = lowerPoints[lLen - 1], p2 = upperPoints[0]
+				$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
+				dist = p2[1] - p1[1], to = dist - radius - aSize
+				$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(" + 90 + "deg)")
+				$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed)
+			}
+		}
+	}
+	
+	function processLower(){
+		if(lowerInfo.length <= 1) {now += 1; frameLower()}
+		else{
+			len = lowerInfo.length;
+			if(lowerInfo[len - 1][2] <= lowerInfo[len - 2][2]) {now += 1; frameLower()}
+			else{
+				a2 = lowerInfo[len - 1],a1 = lowerInfo[len - 2]
+				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .rect').css("background-color",delColor)
+				$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .rect').css("background-color",delColor)
+				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .tri').css("border-left-color",delColor)
+				$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .tri').css("border-left-color",delColor)
+				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .rect').animate({width:2}, speed, function(){
+					$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .rect').animate({width:2}, speed, function(){
+						p1 = a1[0],p2 = a2[1]
+						lowerInfo.pop();lowerInfo.pop();
+						$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
+						dist = Math.sqrt((p2[0] - p1[0]) * (p2[0] - p1[0]) + (p2[1] - p1[1]) * (p2[1] - p1[1]))
+						angle = 180 * Math.atan((p1[1] - p2[1]) / (p1[0] - p2[0])) / Math.PI
+						r = angle + 180
+						to = dist - radius - aSize
+						$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(" + r + "deg)")
+						$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed, function(){
+							lowerInfo.push([p1,p2,angle])
+							processLower()
+						})
+					})
+				})
+			}
+		}
+	}
+	
+	points = [],count = 1,groups = [],upperPoints = [],lowerPoints = [],upperInfo = [],lowerInfo = []
+	
+	$("body").click(function(e){
+		points.push([e.clientX, e.clientY, count])
+		$("body").append($("<div id='node" + count + "' class='node'>" + count + "</div>").css("top",e.clientY - radius).css("left",e.clientX - radius))
+		count += 1
+	})
+	
+	$("#run").click(function(e){
+		e.stopPropagation()
+		groups = [],upperPoints = [],lowerPoints = [],upperInfo = [],lowerInfo = []
+		$(".arrow").remove()
+		
+		plen = points.length, glen = 1
+		points = points.sort(function(one, two){ return one[0] - two[0]})
+		
+		groups.push([points[0]])
+		for(var i = 1; i < plen; i++){
+			if(points[i][0] != groups[glen-1][0][0]){
+				groups.push([])
+				glen += 1
+				groups[glen-1].push(points[i])
+			}else
+				groups[glen-1].push(points[i])
+		}
+		
+		for(var i = 0; i < glen; i++)
+			groups[i] = groups[i].sort(function(one, two){ return one[1] - two[1]})
+			
+		for(var i = 0; i < glen; i++){
+			upperPoints.push(groups[i][groups[i].length - 1])
+			lowerPoints.push(groups[i][0])
+		}
+		lowerPoints = lowerPoints.reverse()
+		
+		now = 0; uLen = upperPoints.length; lLen = lowerPoints.length;
+		frameUpper();
+	})
+})
+</script>
