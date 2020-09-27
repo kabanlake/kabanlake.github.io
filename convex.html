@@ -1,201 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>R-Tree</title>
+</head>
+
 <style>
-*{
-	padding:0; margin:0;
-}
-.node{
-	position:absolute; width:40; height:40; border-radius:20px; font-size:28px;
-	background-color:green; color:white; text-align:center;
-	z-index:10
-}
-.arrow{
-	font-size:0;
-	transform-origin:0 50%;
-	position:absolute;
-	z-index:8;
-}
-.rect{
-	background-color:red;
-	height:8; width:2;
-}
-.tri{
-	background-color:white;
-	height:0; width:0;
-	border-left:16px solid red;
-	border-top:8px solid white;
-	border-bottom:8px solid white;
-	display:inline-block;
-	position:absolute; right:-16; top:-4;
-}
-#run{
-	position:absolute; top:0; left:0;
-	height:30; width:200;
-	text-align:center;
-	font:24px bold;
-	color:white; background-color:green;
-	border-radius:4px;
-}
-#add:hover,#run:hover{
-	color:yellow; background-color:#6495ed;
-}
+    *{
+        margin: 0; padding: 0;
+    }
+
+    body{
+        width: 1800px; height: 900px;
+    }
+
+    .point{
+        position: absolute;
+        background-color: cornflowerblue;
+        width: 12px; height: 12px;
+        border-radius: 6px;
+        z-index: 1;
+    }
+
+    .point:hover{
+        background-color: lightcoral;
+    }
+
+    .rect{
+        position: absolute;
+        background-color: transparent;
+        border: 4px solid red;
+        z-index: 0;
+    }
 </style>
 
-<label id="run">Start Game</label>
+<body>
+</body>
 
-<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
 <script>
-$(document).ready(function(){
-	speed = 400,delColor = '#1E90FF',radius = 20, aSize = 16
-	function frameUpper(){
-		if(now < uLen - 1){
-			p1 = upperPoints[now], p2 = upperPoints[now + 1]
-			$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
-			dist = Math.sqrt((p2[0] - p1[0]) * (p2[0] - p1[0]) + (p2[1] - p1[1]) * (p2[1] - p1[1]))
-			angle = 180 * Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])) / Math.PI
-			to = dist - radius - aSize
-			$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(" + angle + "deg)")
-			$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed, function(){
-				upperInfo.push([p1,p2,angle])
-				processUpper()
-			})
-		}else{
-			if(upperPoints[uLen - 1][2] != lowerPoints[0][2]){
-				p1 = upperPoints[uLen - 1], p2 = lowerPoints[0]
-				$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
-				dist = p1[1] - p2[1], to = dist - radius - aSize
-				$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(-" + 90 + "deg)")
-				$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed, function(){
-					now = 0
-					frameLower()
-				})
-			}else{
-				now = 0
-				frameLower();
-			}
-		}
-	}
-	
-	function processUpper(){
-		if(upperInfo.length <= 1) {now += 1; frameUpper()}
-		else{
-			len = upperInfo.length;
-			if(upperInfo[len - 1][2] <= upperInfo[len - 2][2]) {now += 1; frameUpper()}
-			else{
-				a2 = upperInfo[len - 1],a1 = upperInfo[len - 2]
-				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .rect').css("background-color",delColor)
-				$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .rect').css("background-color",delColor)
-				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .tri').css("border-left-color",delColor)
-				$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .tri').css("border-left-color",delColor)
-				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .rect').animate({width:2}, speed, function(){
-					$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .rect').animate({width:2}, speed, function(){
-						p1 = a1[0],p2 = a2[1]
-						upperInfo.pop();upperInfo.pop();
-						$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
-						dist = Math.sqrt((p2[0] - p1[0]) * (p2[0] - p1[0]) + (p2[1] - p1[1]) * (p2[1] - p1[1]))
-						angle = 180 * Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])) / Math.PI
-						to = dist - radius - aSize
-						$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(" + angle + "deg)")
-						$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed, function(){
-							upperInfo.push([p1,p2,angle])
-							processUpper()
-						})
-					})
-				})
-			}
-		}
-	}
-	
-	function frameLower(){
-		if(now < lLen - 1){
-			p1 = lowerPoints[now], p2 = lowerPoints[now + 1]
-			$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
-			dist = Math.sqrt((p2[0] - p1[0]) * (p2[0] - p1[0]) + (p2[1] - p1[1]) * (p2[1] - p1[1]))
-			angle = 180 * Math.atan((p1[1] - p2[1]) / (p1[0] - p2[0])) / Math.PI
-			r = angle + 180
-			to = dist - radius - aSize
-			$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(" + r + "deg)")
-			$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed, function(){
-				lowerInfo.push([p1,p2,angle])
-				processLower()
-			})
-		}else{
-			if(upperPoints[0][2] != lowerPoints[lLen - 1][2]){
-				p1 = lowerPoints[lLen - 1], p2 = upperPoints[0]
-				$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
-				dist = p2[1] - p1[1], to = dist - radius - aSize
-				$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(" + 90 + "deg)")
-				$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed)
-			}
-		}
-	}
-	
-	function processLower(){
-		if(lowerInfo.length <= 1) {now += 1; frameLower()}
-		else{
-			len = lowerInfo.length;
-			if(lowerInfo[len - 1][2] <= lowerInfo[len - 2][2]) {now += 1; frameLower()}
-			else{
-				a2 = lowerInfo[len - 1],a1 = lowerInfo[len - 2]
-				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .rect').css("background-color",delColor)
-				$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .rect').css("background-color",delColor)
-				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .tri').css("border-left-color",delColor)
-				$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .tri').css("border-left-color",delColor)
-				$("#arrow" + a2[0][2] + '_' + a2[1][2] + ' .rect').animate({width:2}, speed, function(){
-					$("#arrow" + a1[0][2] + '_' + a1[1][2] + ' .rect').animate({width:2}, speed, function(){
-						p1 = a1[0],p2 = a2[1]
-						lowerInfo.pop();lowerInfo.pop();
-						$("body").append($('<div id="arrow' + p1[2] + '_' + p2[2] + '" class="arrow"><div class="rect"><div class="tri"></div></div></div>').css("top",p1[1] - aSize / 4).css("left",p1[0]))
-						dist = Math.sqrt((p2[0] - p1[0]) * (p2[0] - p1[0]) + (p2[1] - p1[1]) * (p2[1] - p1[1]))
-						angle = 180 * Math.atan((p1[1] - p2[1]) / (p1[0] - p2[0])) / Math.PI
-						r = angle + 180
-						to = dist - radius - aSize
-						$("#arrow" + p1[2] + '_' + p2[2]).css("transform","rotate(" + r + "deg)")
-						$("#arrow" + p1[2] + '_' + p2[2] + " .rect").animate({width:to}, speed, function(){
-							lowerInfo.push([p1,p2,angle])
-							processLower()
-						})
-					})
-				})
-			}
-		}
-	}
-	
-	points = [],count = 1,groups = [],upperPoints = [],lowerPoints = [],upperInfo = [],lowerInfo = []
-	
-	$("body").click(function(e){
-		points.push([e.clientX, e.clientY, count])
-		$("body").append($("<div id='node" + count + "' class='node'>" + count + "</div>").css("top",e.clientY - radius).css("left",e.clientX - radius))
-		count += 1
-	})
-	
-	$("#run").click(function(e){
-		e.stopPropagation()
-		groups = [],upperPoints = [],lowerPoints = [],upperInfo = [],lowerInfo = []
-		$(".arrow").remove()
-		
-		plen = points.length, glen = 1
-		points = points.sort(function(one, two){ return one[0] - two[0]})
-		
-		groups.push([points[0]])
-		for(var i = 1; i < plen; i++){
-			if(points[i][0] != groups[glen-1][0][0]){
-				groups.push([])
-				glen += 1
-				groups[glen-1].push(points[i])
-			}else
-				groups[glen-1].push(points[i])
-		}
-		
-		for(var i = 0; i < glen; i++)
-			groups[i] = groups[i].sort(function(one, two){ return one[1] - two[1]})
-			
-		for(var i = 0; i < glen; i++){
-			upperPoints.push(groups[i][groups[i].length - 1])
-			lowerPoints.push(groups[i][0])
-		}
-		lowerPoints = lowerPoints.reverse()
-		
-		now = 0; uLen = upperPoints.length; lLen = lowerPoints.length;
-		frameUpper();
-	})
-})
+    $(document).ready(function () {
+        Array.prototype.subset = function(sub){tmp = this; return sub.reduce(function(set, ele){set.push(tmp[ele]); return set}, [])}
+
+        Array.prototype.remove = function(eles){return this.reduce(function (set, e) {if(eles.indexOf(e) == -1) set.push(e); return set}, [])}
+
+        Array.prototype.max = function () {tmp = this; return Math.max(...tmp)}
+
+        Array.prototype.min = function () {tmp = this; return Math.min(...tmp)}
+
+        point_radius = 6; border_width = 4; gap = 3; pC = 0; rC = 1; m = 2; xs = []; ys = []
+        colors = ["red", "#7fff00", "#ff1493", "#20b2aa", "#ffbf00", "skyblue", "pink"]
+
+        function LeafNode(id){
+            this.children = []
+            this.isLeaf = true
+            this.id = id
+            this.level = 0
+            this.rect = [0,0,0,0]
+            this.parent = undefined
+            this.addChild = function (index) {
+                this.children.push(index)
+            }
+            this.addChildren = function (indexes) {
+                this.children = this.children.concat(indexes)
+            }
+            this.update = function () {
+                xmin = xs.subset(this.children).min(); xmax = xs.subset(this.children).max()
+                ymin = ys.subset(this.children).min(); ymax = ys.subset(this.children).max()
+                width = (xmax - xmin) + 2 * point_radius
+                height = (ymax - ymin) + 2 * point_radius
+                $('#' + this.id).css("top", ymin - point_radius - border_width).css("left", xmin - point_radius - border_width).css("width", width).css("height", height).css("z-index", -1 * this.level)
+                this.rect = [xmin, ymin, xmax, ymax]
+            }
+            this.go = function () {
+                this.addChild(xs.length - 1)
+                if(this.children.length > 2 * m){
+                    new_node = new LeafNode("rect-" + rC); rC += 1
+                    $("body").append($("<div class='rect' id = '" + new_node.id + "'></div>"))
+                    magic = this.partition()
+                    if(magic){
+                        new_node.children = this.children.slice(m + 1, 2 * m + 1)
+                        this.children = this.children.slice(0, m + 1)
+                    }else{
+                        new_node.children = this.children.slice(m, 2 * m + 1)
+                        this.children = this.children.slice(0, m)
+                    }
+                    new_node.update()
+                    this.update()
+                    if(this.parent == undefined){
+                        this.parent = new StemNode("rect-" + rC); rC += 1
+                        this.parent.level = 1
+                        new_node.parent = this.parent
+                        this.parent.addNodes([this, new_node])
+                        $("body").append($("<div class='rect' id = '" + this.parent.id + "'></div>").css("border-color", colors[this.parent.level]))
+                        root = this.parent
+                        root.update()
+                    }else{
+                        new_node.parent = this.parent
+                        this.parent.addNode(new_node)
+                    }
+                }else
+                    this.update()
+            }
+            this.partition = function(){
+                four = []
+                this.children.sort(function (v1, v2) {
+                    if(xs[v1] < xs[v2]) return -1;
+                    return 1;
+                });
+                xs_1 = xs.subset(this.children.slice(0, m))
+                ys_1 = ys.subset(this.children.slice(0, m))
+                xs_2 = xs.subset(this.children.slice(m, 2 * m + 1))
+                ys_2 = ys.subset(this.children.slice(m, 2 * m + 1))
+                a1 = (xs_1.max() - xs_1.min()) * (ys_1.max() - ys_1.min())
+                a2 = (xs_2.max() - xs_2.min()) * (ys_2.max() - ys_2.min())
+                four.push(a1 + a2)
+
+                xs_1 = xs.subset(this.children.slice(0, m + 1))
+                ys_1 = ys.subset(this.children.slice(0, m + 1))
+                xs_2 = xs.subset(this.children.slice(m + 1, 2 * m + 1))
+                ys_2 = ys.subset(this.children.slice(m + 1, 2 * m + 1))
+                a1 = (xs_1.max() - xs_1.min()) * (ys_1.max() - ys_1.min())
+                a2 = (xs_2.max() - xs_2.min()) * (ys_2.max() - ys_2.min())
+                four.push(a1 + a2)
+
+                this.children.sort(function (v1, v2) {
+                    if(ys[v1] < ys[v2]) return -1;
+                    return 1;
+                });
+
+                xs_1 = xs.subset(this.children.slice(0, m))
+                ys_1 = ys.subset(this.children.slice(0, m))
+                xs_2 = xs.subset(this.children.slice(m, 2 * m + 1))
+                ys_2 = ys.subset(this.children.slice(m, 2 * m + 1))
+                a1 = (xs_1.max() - xs_1.min()) * (ys_1.max() - ys_1.min())
+                a2 = (xs_2.max() - xs_2.min()) * (ys_2.max() - ys_2.min())
+                four.push(a1 + a2)
+
+                xs_1 = xs.subset(this.children.slice(0, m + 1))
+                ys_1 = ys.subset(this.children.slice(0, m + 1))
+                xs_2 = xs.subset(this.children.slice(m + 1, 2 * m + 1))
+                ys_2 = ys.subset(this.children.slice(m + 1, 2 * m + 1))
+                a1 = (xs_1.max() - xs_1.min()) * (ys_1.max() - ys_1.min())
+                a2 = (xs_2.max() - xs_2.min()) * (ys_2.max() - ys_2.min())
+                four.push(a1 + a2)
+
+                pos = four.indexOf(four.min())
+                if(pos <= 1){
+                    this.children.sort(function (v1, v2) {
+                        if(xs[v1] < xs[v2]) return -1;
+                        return 1;
+                    });
+                    return pos
+                }else
+                    return pos - 2
+            }
+        }
+
+        function StemNode(id) {
+            this.children = []
+            this.isLeaf = false
+            this.id = id
+            this.rect = [0,0,0,0]
+            this.parent = undefined
+            this.addNode = function (Node) {
+                this.children.push(Node)
+            }
+            this.addNodes = function (Nodes) {
+                this.children = this.children.concat(Nodes)
+            }
+            this.update = function () {
+                rects = this.children.map(function(node){return node.rect})
+                xmin = rects.map(function(rect){return rect[0]}).min()
+                ymin = rects.map(function(rect){return rect[1]}).min()
+                xmax = rects.map(function(rect){return rect[2]}).max()
+                ymax = rects.map(function(rect){return rect[3]}).max()
+                width = (xmax - xmin) + 2 * point_radius + 2 * (this.level * (gap + border_width))
+                height = (ymax - ymin) + 2 * point_radius + 2 * (this.level * (gap + border_width))
+                $('#' + this.id).css("top", ymin - point_radius - border_width - this.level * (border_width + gap)).css("left", xmin - point_radius - border_width - this.level * (border_width + gap)).css("width", width).css("height", height).css("z-index", -1 * this.level)
+                this.rect = [xmin, ymin, xmax, ymax]
+            }
+            this.go = function () {
+                if(this.children.length > 2 * m){
+                    new_node = new StemNode("rect-" + rC); rC += 1
+                    new_node.level = this.level
+                    $("body").append($("<div class='rect' id = '" + new_node.id + "'></div>").css("border-color", colors[new_node.level]))
+                    result = this.partition()
+                    new_node.children = this.children.subset(result[0])
+                    new_node.children.forEach(function(child){child.parent = new_node})
+                    this.children = this.children.subset(result[1])
+                    new_node.update()
+                    this.update()
+                    if(this.parent == undefined){
+                        this.parent = new StemNode("rect-" + rC); rC += 1
+                        this.parent.level = this.level + 1
+                        new_node.parent = this.parent
+                        this.parent.addNodes([this, new_node])
+                        $("body").append($("<div class='rect' id = '" + this.parent.id + "'></div>").css("border-color", colors[this.parent.level]))
+                        root = this.parent
+                        root.update()
+                    }else{
+                        new_node.parent = this.parent
+                        this.parent.addNode(new_node)
+                    }
+                }else
+                    this.update()
+            }
+            this.partition = function(){
+                len = this.children.length
+                first = 0; second = 0
+                tmp_area = -1
+                for(i = 0; i <= len - 2; i++){
+                    for(j = i + 1; j <= len - 1; j++){
+                        ch1 = this.children[i].rect; ch2 = this.children[j].rect
+                        a1 = (ch1[2] - ch1[0]) * (ch1[3] - ch1[1])
+                        a2 = (ch2[2] - ch2[0]) * (ch2[3] - ch2[1])
+                        aa = ([ch1[2], ch2[2]].max() - [ch1[0], ch2[0]].min()) * ([ch1[3], ch2[3]].max() - [ch1[1], ch2[1]].min())
+                        if((aa - a1 - a2) > tmp_area){
+                            tmp_area = aa - a1 - a2
+                            first = i; second = j
+                        }
+                    }
+                }
+                one = []; one.push(first); two = []; two.push(second)
+                left = []
+                for(i = 0; i < len; i++) left.push(i);
+                left = left.remove([one[0], two[0]])
+
+                while(left.length != 0){
+                    if(one.length == m + 1 || two.length == m + 1){
+                        if(one.length == m + 1)
+                            two = two.concat(left)
+                        else
+                            one = one.concat(left)
+                        break
+                    }
+                    rects1 = this.children.subset(one).map(function (node) {return node.rect})
+                    rects2 = this.children.subset(two).map(function (node) {return node.rect})
+                    xmin_1 = rects1.map(function(rect){return rect[0]}).min()
+                    ymin_1 = rects1.map(function(rect){return rect[1]}).min()
+                    xmax_1 = rects1.map(function(rect){return rect[2]}).max()
+                    ymax_1 = rects1.map(function(rect){return rect[3]}).max()
+                    a1 = (xmax_1 - xmin_1) * (ymax_1 - ymin_1)
+                    xmin_2 = rects2.map(function(rect){return rect[0]}).min()
+                    ymin_2 = rects2.map(function(rect){return rect[1]}).min()
+                    xmax_2 = rects2.map(function(rect){return rect[2]}).max()
+                    ymax_2 = rects2.map(function(rect){return rect[3]}).max()
+                    a2 = (xmax_2 - xmin_2) * (ymax_2 - ymin_2)
+                    add1 = []; add2 = []; diff = []
+                    for(k = 0; k < left.length; k++){
+                        xmin1 = [xmin_1, this.children[left[k]].rect[0]].min()
+                        ymin1 = [ymin_1, this.children[left[k]].rect[1]].min()
+                        xmax1 = [xmax_1, this.children[left[k]].rect[2]].max()
+                        ymax1 = [ymax_1, this.children[left[k]].rect[3]].max()
+                        add1.push((ymax1 - ymin1) * (xmax1 - xmin1) - a1)
+                        xmin2 = [xmin_2, this.children[left[k]].rect[0]].min()
+                        ymin2 = [ymin_2, this.children[left[k]].rect[1]].min()
+                        xmax2 = [xmax_2, this.children[left[k]].rect[2]].max()
+                        ymax2 = [ymax_2, this.children[left[k]].rect[3]].max()
+                        add2.push((ymax2 - ymin2) * (xmax2 - xmin2) - a2)
+                        diff.push(Math.abs(add1[add1.length - 1] - add2[add2.length - 1]))
+                    }
+                    pos = diff.indexOf(diff.max())
+                    if(add1[pos] < add2[pos])
+                        one.push(left[pos])
+                    else
+                        two.push(left[pos])
+                    left = left.remove([left[pos]])
+                }
+                return [one, two]
+            }
+            this.choose = function (index) {
+                enlarge = this.children.reduce(function (set, child) {
+                    r = child.rect
+                    a1 = (r[2] - r[0]) * (r[3] - r[1])
+                    a2 = (Math.max(r[2], xs[index]) - Math.min(r[0], xs[index])) * (Math.max(r[3], ys[index]) - Math.min(r[1], ys[index]))
+                    set.push(a2 - a1)
+                    return set
+                }, [])
+                pos = enlarge.indexOf(enlarge.min())
+                return this.children[pos]
+            }
+        }
+
+        function insertPoint(index) {
+            active = [root]
+            while(! active[active.length - 1].isLeaf){
+                active.push(active[active.length - 1].choose(index))
+            }
+            for(go_index = active.length - 1; go_index >= 0; go_index--) {
+                active[go_index].go()
+            }
+        }
+
+        root = new LeafNode("rect-0")
+        $("body").append($("<div class='rect' id = '" + root.id + "'></div>"))
+
+        $("body").click(function (e) {
+            xs.push(e.pageX); ys.push(e.pageY)
+            $("body").append($("<div class='point' id = '#point-" + pC + "'></div>").css("top", e.pageY - point_radius).css("left", e.pageX - point_radius))
+            insertPoint(pC)
+            pC += 1
+        })
+    })
 </script>
+
+</html>
