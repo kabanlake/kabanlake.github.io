@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>R-Tree</title>
 </head>
 
 <style>
@@ -11,14 +11,14 @@
     }
 
     body{
-        width: 1800px; height: 1000px;
+        width: 1800px; height: 900px;
     }
 
     .point{
         position: absolute;
         background-color: cornflowerblue;
-        width: 16px; height: 16px;
-        border-radius: 8px;
+        width: 12px; height: 12px;
+        border-radius: 6px;
         z-index: 1;
     }
 
@@ -29,7 +29,7 @@
     .rect{
         position: absolute;
         background-color: transparent;
-        border: 6px solid red;
+        border: 4px solid red;
         z-index: 0;
     }
 </style>
@@ -48,8 +48,8 @@
 
         Array.prototype.min = function () {tmp = this; return Math.min(...tmp)}
 
-        point_radius = 8; border_width = 6; gap = 3; pC = 0; rC = 1; m = 2; xs = []; ys = []
-        colors = ["red", "#7fff00", "#ff1493", "#20b2aa", "#ffd700"]
+        point_radius = 6; border_width = 4; gap = 3; pC = 0; rC = 1; m = 2; xs = []; ys = []
+        colors = ["red", "#7fff00", "#ff1493", "#20b2aa", "#ffbf00", "skyblue", "pink"]
 
         function LeafNode(id){
             this.children = []
@@ -175,8 +175,8 @@
                 ymin = rects.map(function(rect){return rect[1]}).min()
                 xmax = rects.map(function(rect){return rect[2]}).max()
                 ymax = rects.map(function(rect){return rect[3]}).max()
-                width = (xmax - xmin) + 2 * point_radius + 2 * border_width + 2 * (this.level * gap + (this.level - 1) * border_width)
-                height = (ymax - ymin) + 2 * point_radius + 2 * border_width + 2 * (this.level * gap + (this.level - 1) * border_width)
+                width = (xmax - xmin) + 2 * point_radius + 2 * (this.level * (gap + border_width))
+                height = (ymax - ymin) + 2 * point_radius + 2 * (this.level * (gap + border_width))
                 $('#' + this.id).css("top", ymin - point_radius - border_width - this.level * (border_width + gap)).css("left", xmin - point_radius - border_width - this.level * (border_width + gap)).css("width", width).css("height", height).css("z-index", -1 * this.level)
                 this.rect = [xmin, ymin, xmax, ymax]
             }
