@@ -37,9 +37,15 @@
 #add:hover,#run:hover{
 	color:yellow; background-color:#6495ed;
 }
+#rules{
+	text-align:center;
+	font-size:24px;
+	top:2px;
+}
 </style>
 
 <label id="run">Start Game</label>
+<p id="rules">Please click anywhere to create some points, then click the left button.</p>
 
 <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <script>
@@ -162,6 +168,8 @@ $(document).ready(function(){
 	points = [],count = 1,groups = [],upperPoints = [],lowerPoints = [],upperInfo = [],lowerInfo = []
 	
 	$("body").click(function(e){
+		if(points.length == 0)
+			$("#rules").remove()
 		points.push([e.clientX, e.clientY, count])
 		$("body").append($("<div id='node" + count + "' class='node'>" + count + "</div>").css("top",e.clientY - radius).css("left",e.clientX - radius))
 		count += 1
