@@ -33,11 +33,11 @@
         z-index: 0;
     }
 	
-	#rules{
-		text-align:center;
-		font-size:24px;
-		top:2px;
-	}
+    #rules{
+	text-align:center;
+	font-size:24px;
+	top:2px;
+    }
 </style>
 
 <body>
@@ -304,8 +304,8 @@
         $("body").append($("<div class='rect' id = '" + root.id + "'></div>"))
 
         $("body").click(function (e) {
-			if(pC == 0)
-				$("#rules").remove()
+	    if(pC == 0)
+		$("#rules").remove()
             xs.push(e.pageX); ys.push(e.pageY)
             $("body").append($("<div class='point' id = '#point-" + pC + "'></div>").css("top", e.pageY - point_radius).css("left", e.pageX - point_radius))
             insertPoint(pC)
